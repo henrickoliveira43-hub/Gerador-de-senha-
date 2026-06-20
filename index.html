@@ -1,0 +1,244 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gerador de Senha Forte</title>
+    <style>
+        /* Variáveis de Cores */
+        :root {
+            --bg-color: #f4f7f6;
+            --card-bg: #ffffff;
+            --primary-color: #4CAF50;
+            --primary-hover: #45a049;
+            --text-color: #333333;
+            --border-color: #dddddd;
+        }
+
+        /* Reset Básico */
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        /* Container Principal do App */
+        .app-container {
+            background-color: var(--card-bg);
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
+            width: 100%;
+            max-width: 400px;
+            text-align: center;
+        }
+
+        h2 {
+            margin-bottom: 20px;
+            color: var(--text-color);
+        }
+
+        /* Área de exibição da senha */
+        .password-display {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background-color: var(--bg-color);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 15px;
+            margin-bottom: 20px;
+        }
+
+        #password-result {
+            font-size: 1.5rem;
+            font-weight: bold;
+            letter-spacing: 2px;
+            color: var(--primary-color);
+            word-break: break-all;
+        }
+
+        /* Agrupamento de Opções */
+        .options-group {
+            margin-bottom: 25px;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .options {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+        }
+
+        .options label {
+            cursor: pointer;
+            font-size: 1.1rem;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        /* Botões */
+        button {
+            width: 100%;
+            padding: 15px;
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 1.1rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: background-color 0.3s;
+            margin-bottom: 10px;
+        }
+
+        button:hover {
+            background-color: var(--primary-hover);
+        }
+
+        .btn-copy {
+            background-color: #6c757d;
+            padding: 8px 15px;
+            width: auto;
+            margin: 0;
+            font-size: 0.9rem;
+        }
+
+        .btn-copy:hover {
+            background-color: #5a6268;
+        }
+
+        /* Mensagem de Cópia */
+        .toast {
+            font-size: 0.9rem;
+            color: var(--primary-color);
+            opacity: 0;
+            transition: opacity 0.3s;
+            height: 20px;
+            margin-bottom: 10px;
+        }
+
+        /* Responsividade Extra para Celulares Muito Pequenos */
+        @media (max-width: 350px) {
+            .password-display {
+                flex-direction: column;
+                gap: 10px;
+            }
+            .btn-copy {
+                width: 100%;
+            }
+            .options {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 10px;
+                margin-left: 20%;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="app-container">
+        <h2>Gerador de Senha</h2>
+
+        <div class="password-display">
+            <span id="password-result">---</span>
+            <button class="btn-copy" onclick="copyPassword()">Copiar</button>
+        </div>
+        
+        <div class="toast" id="toast-msg">Senha copiada com sucesso!</div>
+
+        <div class="options-group">
+            <div class="options">
+                <label>
+                    <input type="radio" name="length" value="4" checked> 4 Dígitos
+                </label>
+                <label>
+                    <input type="radio" name="length" value="6"> 6 Dígitos
+                </label>
+            </div>
+            
+            <div class="options">
+                <label>
+                    <input type="checkbox" id="numeric-only"> Apenas Números (PIN)
+                </label>
+            </div>
+        </div>
+
+        <button onclick="generatePassword()">Gerar Senha Aleatória</button>
+    </div>
+
+    <script>
+        // Conjuntos de caracteres separados
+        const strongChars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!@#$%&*+?";
+        const numericChars = "0123456789";
+
+        function generatePassword() {
+            // Verifica qual botão de rádio está selecionado (4 ou 6)
+            const lengthOptions = document.getElementsByName('length');
+            let passwordLength = 4; // padrão
+            
+            for (let option of lengthOptions) {
+                if (option.checked) {
+                    passwordLength = parseInt(option.value);
+                    break;
+                }
+            }
+
+            // Verifica se a opção "Apenas Números" está marcada
+            const isNumericOnly = document.getElementById("numeric-only").checked;
+            
+            // Define qual conjunto de caracteres usar com base na caixa de seleção
+            const charsToUse = isNumericOnly ? numericChars : strongChars;
+
+            let password = "";
+            
+            // Loop para gerar caracteres aleatórios
+            for (let i = 0; i < passwordLength; i++) {
+                const randomIndex = Math.floor(Math.random() * charsToUse.length);
+                password += charsToUse.substring(randomIndex, randomIndex + 1);
+            }
+
+            // Exibe a senha na tela
+            document.getElementById("password-result").innerText = password;
+            
+            // Esconde a mensagem de cópia se uma nova senha for gerada
+            document.getElementById("toast-msg").style.opacity = "0";
+        }
+
+        function copyPassword() {
+            const passwordText = document.getElementById("password-result").innerText;
+            
+            // Não copia se não houver senha gerada
+            if (passwordText === "---") return;
+
+            // Usa a API Clipboard moderna
+            navigator.clipboard.writeText(passwordText).then(() => {
+                const toast = document.getElementById("toast-msg");
+                toast.style.opacity = "1";
+                
+                // Oculta a mensagem após 2.5 segundos
+                setTimeout(() => {
+                    toast.style.opacity = "0";
+                }, 2500);
+            }).catch(err => {
+                console.error('Falha ao copiar senha: ', err);
+            });
+        }
+    </script>
+</body>
+</html>
